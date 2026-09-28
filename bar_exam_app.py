@@ -857,7 +857,7 @@ elif st.session_state["active_tab"] == "upload":
         st.success("ავტორიზაცია წარმატებულია!")
         st.rerun()
       else:
-        st.error("❌ არასწორი პაროლი! (პაროლია: legal)")
+        st.error("❌ არასწორი პაროლი!")
     st.markdown("</div>", unsafe_allow_html=True)
   else:
     st.success("✅ ავტორიზებული ხართ როგორც ადმინისტრატორი!")
@@ -877,6 +877,7 @@ elif st.session_state["active_tab"] == "upload":
               "საკონსტიტუციო სამართალი",
               "საერთაშორისო სამართალი",
               "ადვოკატთა პროფესიული ეთიკა",
+              "საქმეები",
           ],
       )
 
