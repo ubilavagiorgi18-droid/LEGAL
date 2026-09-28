@@ -9,7 +9,7 @@ import streamlit as st
 # 1. PAGE CONFIGURATION & STYLING
 # ==============================================================================
 st.set_page_config(
-    page_title="ადვოკატთა გამოცდის პორტალი",
+    page_title="მოგესალმებით LEGAL-ზე",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -301,7 +301,7 @@ if not st.session_state["user_name"]:
     )
 
     name_input = st.text_input(
-        "თქვენი სახელი და გვარი:", placeholder="მაგ: გიორგი ბერიძე"
+        "თქვენი სახელი და გვარი:", placeholder="სახელი"
     )
     if st.button("🚀 მთავარ მენიუში შესვლა"):
       if name_input.strip():
@@ -317,7 +317,7 @@ if not st.session_state["user_name"]:
 # 5. NAVIGATION & SIDEBAR
 # ==============================================================================
 st.sidebar.title(f"👤 {st.session_state['user_name']}")
-st.sidebar.caption("ადვოკატობის კანდიდატი")
+st.sidebar.caption("დაიმახსოვრე მარტივად")
 
 if st.sidebar.button("🚪 გამოსვლა (სახელის შეცვლა)"):
   st.session_state["user_name"] = None
@@ -333,7 +333,7 @@ menu_choice = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡 **შენიშვნა:** ატვირთვის გრაფის პაროლია: `legal`")
+st.sidebar.info("💡 **შენიშვნა:** ლინკი არ გაუზიაროთ არავის")
 
 # ==============================================================================
 # 6. 📖 STUDY MODE
