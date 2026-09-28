@@ -9,7 +9,7 @@ import streamlit as st
 # 1. PAGE CONFIGURATION & STYLING
 # ==============================================================================
 st.set_page_config(
-    page_title="მოგესალმებით LEGAL-ზე",
+    page_title="LEGAL",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -282,13 +282,13 @@ cases_db = load_data()
 
 if not st.session_state["user_name"]:
   st.markdown(
-      "<h1 class='main-header'>⚖️ ადვოკატთა გამოცდის მოსამზადებელი"
+      "<h1 class='main-header'>⚖️ LEGALL"
       " პორტალი</h1>",
       unsafe_allow_html=True,
   )
   st.markdown(
-      "<p class='sub-header'>მოემზადეთ საქართველოს ადვოკატთა ასოციაციის"
-      " საკვალიფიკაციო გამოცდისთვის</p>",
+      "<p class='sub-header'>ბევრ კითხვას ჯობია"
+      </p>",
       unsafe_allow_html=True,
   )
 
