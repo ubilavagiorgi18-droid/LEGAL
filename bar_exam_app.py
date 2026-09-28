@@ -219,76 +219,142 @@ def parse_uploaded_file(uploaded_file, selected_code, file_name=None):
   if file_name is None:
     file_name = getattr(uploaded_file, "name", "gdrive_doc.docx")
 
-  content_text = ""
+  content_lines = []
+
   if file_name.endswith(".docx"):
     try:
       import docx
 
       doc = docx.Document(uploaded_file)
-      paragraphs = [p.text.strip() for p in doc.paragraphs]
-      content_text = "\n".join(paragraphs)
-    except Exception:
+
+      # 1. წავიკითხოთ ყველა აბზაცი (მათ შორის Shift+Enter)
+      for p in doc.paragraphs:
+        # XML-დან Shift+Enter-ების ჩანაცვლება ჩვეულებრივი სტრიქონის გადაყვანით
+        p_text = p.text
+        if p_text and p_text.strip():
+          content_lines.append(p_text.strip())
+        else:
+          content_lines.append("")  # ცარიელი სტრიქონი გამყოფად
+
+      # 2. თუ ფაილში ცხრილებია (Tables), წავიკითხოთ ცხრილების ტექსტიც!
+      for table in doc.tables:
+        for row in table.rows:
+          row_text = [
+              cell.text.strip() for cell in row.cells if cell.text.strip()
+          ]
+          if row_text:
+            content_lines.append(" | ".join(row_text))
+
+    except Exception as e:
       if hasattr(uploaded_file, "read"):
-        content_text = str(uploaded_file.read().decode("utf-8", "ignore"))
+        content_lines = [
+            str(uploaded_file.read().decode("utf-8", "ignore"))
+        ]
       else:
-        content_text = str(uploaded_file)
+        content_lines = [str(uploaded_file)]
   else:
     if hasattr(uploaded_file, "read"):
-      content_text = str(uploaded_file.read().decode("utf-8", "ignore"))
+      raw_text = str(uploaded_file.read().decode("utf-8", "ignore"))
     else:
-      content_text = str(uploaded_file)
+      raw_text = str(uploaded_file)
+    content_lines = raw_text.split("\n")
 
-  text = content_text.replace("\r\n", "\n").replace("\r", "\n")
+  full_text = "\n".join(content_lines).replace("\r\n", "\n").replace("\r", "\n")
 
-  # 1. გამოყოფა '---', '===', '***' გამყოფებით
-  if re.search(r"\n\s*[-=*]{3,}\s*\n", text) or re.search(
-      r"^\s*[-=*]{3,}\s*\n", text
-  ):
-    raw_blocks = [
+  # 3. მრავალდონიანი დაყოფა კაზუსებად
+  # ა) გამყოფებით (---, ===, ***)
+  if re.search(r"\n\s*[-=*]{3,}\s*\n", full_text):
+    blocks = [
         b.strip()
-        for b in re.split(r"\n?\s*[-=*]{3,}\s*\n?", text)
+        for b in re.split(r"\n?\s*[-=*]{3,}\s*\n?", full_text)
         if b.strip()
     ]
-  # 2. გამოყოფა ცარიელი სტრიქონებით (\n\n+)
-  elif len([b for b in re.split(r"\n\s*\n+", text) if b.strip()]) > 1:
-    raw_blocks = [b.strip() for b in re.split(r"\n\s*\n+", text) if b.strip()]
-  # 3. გამოყოფა საკვანძო სიტყვებით/ნუმერაციით სტრიქონის დასაწყისში
+  # ბ) ცარიელი სტრიქონებით (Enter-ებით)
+  elif len([b for b in re.split(r"\n\s*\n+", full_text) if b.strip()]) > 1:
+    blocks = [
+        b.strip() for b in re.split(r"\n\s*\n+", full_text) if b.strip()
+    ]
+  # გ) ნუმერაციით ან საკვანძო სიტყვებით (კაზუსი, ტესტი, 1., 2.)
   else:
     pattern = r"(?:^|\n)\s*(?=(?:კაზუსი|ტესტი|კითხვა|საქმე|ქეისი|№|#|N|\d+[\.\)\-–—])\s*)"
-    raw_blocks = [
+    blocks = [
         b.strip()
-        for b in re.split(pattern, text, flags=re.IGNORECASE)
+        for b in re.split(pattern, full_text, flags=re.IGNORECASE)
         if b.strip()
     ]
 
-  if not raw_blocks:
-    raw_blocks = [text.strip()]
+  if not blocks:
+    blocks = [full_text.strip()]
 
   new_cases = []
-  for idx, block in enumerate(raw_blocks):
-    if not block:
+  for idx, block in enumerate(blocks):
+    if not block or len(block) < 5:
       continue
+
     lines = [l.strip() for l in block.split("\n") if l.strip()]
     if not lines:
       continue
 
     title = lines[0][:70]
 
-    # სავარაუდო პასუხების ამოღება (ა, ბ, გ, დ)
     options = []
     question_lines = []
+    explanation_lines = []
+    correct_idx = 0
+
     opt_pattern = r"^\s*([ა-დa-dA-D1-4])[\.\)]\s*(.*)"
+    exp_keywords = [
+      "დასაბუთება:",
+      "განმარტება:",
+      "იურიდიული დასაბუთება:",
+      "სამართლებრივი დასაბუთება:",
+      "სამართლებრივი საფუძველი:",
+      "ანალიზი:",
+    ]
+    correct_keywords = ["სწორი პასუხია:", "სწორი პასუხი:", "პასუხი:"]
+
+    in_explanation = False
 
     for line in lines:
-      match = re.match(opt_pattern, line)
-      if match:
-        options.append(line)
-      else:
-        question_lines.append(line)
+      # შევამოწმოთ, ხომ არ არის სწორი პასუხის მითითება
+      is_correct_line = False
+      for ck in correct_keywords:
+        if ck in line.lower():
+          is_correct_line = True
+          if "ბ" in line.lower() or "2" in line:
+            correct_idx = 1
+          elif "გ" in line.lower() or "3" in line:
+            correct_idx = 2
+          elif "დ" in line.lower() or "4" in line:
+            correct_idx = 3
+          else:
+            correct_idx = 0
+          break
 
-    question_text = "\n".join(question_lines)
-    if not question_text:
-      question_text = block
+      if is_correct_line:
+        continue
+
+      # შევამოწმოთ, ხომ არ იწყება დასაბუთების სექცია
+      is_exp_start = any(k in line.lower() for k in exp_keywords)
+      if is_exp_start:
+        in_explanation = True
+
+      if in_explanation:
+        explanation_lines.append(line)
+      else:
+        # შევამოწმოთ სავარაუდო პასუხი (ა, ბ, გ, დ)
+        match = re.match(opt_pattern, line)
+        if match:
+          options.append(line)
+        else:
+          question_lines.append(line)
+
+    question_text = "\n".join(question_lines) if question_lines else block
+    explanation_text = (
+        "\n".join(explanation_lines)
+        if explanation_lines
+        else f"ანალიზი დაყრდნობილია ატვირთულ ფაილზე: {file_name}."
+    )
 
     if len(options) < 2:
       options = [
@@ -306,11 +372,8 @@ def parse_uploaded_file(uploaded_file, selected_code, file_name=None):
         "file_name": file_name,
         "question": question_text,
         "options": options,
-        "correct_index": 0,
-        "explanation": (
-            f"ანალიზი დაყრდნობილია ატვირთულ ფაილზე: {file_name}. იხ."
-            f" {selected_code}-ის შესაბამისი მუხლები."
-        ),
+        "correct_index": correct_idx,
+        "explanation": explanation_text,
     })
 
   return new_cases
@@ -469,7 +532,7 @@ if not st.session_state["user_name"]:
 
   name_input = st.text_input(
       "სახელი და გვარი:",
-      placeholder="მაგ: გიორგი ბერიძე",
+      placeholder="სახელი",
       label_visibility="collapsed",
   )
   if st.button("🚀 სისტემაში შესვლა"):
@@ -534,7 +597,7 @@ if st.session_state["active_tab"] == "home":
   with h_col1:
     st.markdown(f"### 👋 გამარჯობა, **{st.session_state['user_name']}**!")
     st.write(
-        "მოემზადეთ ადვოკატთა გამოცდისთვის ეფექტურად. გაიარეთ კაზუსები და"
+        " გაიარეთ კაზუსები და"
         " შეამოწმეთ ცოდნა."
     )
     st.caption(
