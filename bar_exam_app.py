@@ -9,7 +9,7 @@ import streamlit as st
 # 1. PAGE CONFIGURATION & SESSION STATE
 # ==============================================================================
 st.set_page_config(
-    page_title="LEGAL",
+    page_title="LEGAL - ადვოკატთა გამოცდის პორტალი",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -20,7 +20,6 @@ PROGRESS_FILE = "bar_exam_progress.json"
 
 DEFAULT_DATA = [
     {
-
         "id": "case_1",
         "title": "ხელშეკრულების შეწყვეტა და ზიანის ანაზღაურება",
         "code": "სამოქალაქო სამართალი",
@@ -102,316 +101,240 @@ DEFAULT_DATA = [
             " ჩაბარების დღიდან."
         ),
     },
-    {
-        "id": "case_4",
-        "title": "სასამართლო პრაქტიკა: საკუთრების უფლების შეზღუდვა",
-        "code": "საქმეები / სასამართლო პრაქტიკა",
-        "article": "კონსტიტუციის 19-ე მუხლი",
-        "file_name": "საკონსტიტუციო_პრაქტიკა.docx",
-        "question": (
-            "საკონსტიტუციო სასამართლოს განმარტებით, რა შემთხვევაშია დასაშვები"
-            " საკუთრების უფლების შეზღუდვა საჯარო ინტერესებისათვის?"
-        ),
-        "options": [
-            "ა) ნებისმიერ დროს, სახელმწიფო ორგანოს გადაწყვეტილებით.",
-            (
-                "ბ) მხოლოდ კანონით დადგენილ შემთხვევებში, თანაბარი და"
-                " სამართლიანი კომპენსაციით."
-            ),
-            "გ) საკუთრების შეზღუდვა არასოდეს არ არის დასაშვები.",
-            "დ) მხოლოდ საგანგებო მდგომარეობის დროს.",
-        ],
-        "correct_index": 1,
-        "explanation": (
-            "საქართველოს კონსტიტუციის 19-ე მუხლის მიხედვით, საკუთრების უფლების"
-            " შეზღუდვა დასაშვებია აუცილებელი საზოგადოებრივი საჭიროებისათვის"
-            " კანონით დადგენილ შემთხვევებში და წესით, ჯეროვანი კომპენსაციით."
-        ),
-    },
-    {
-        "id": "case_5",
-        "title": "ადვოკატთა პროფესიული ეთიკა",
-        "code": "სხვადასხვა",
-        "article": "ეთიკის კოდექსის მე-4 მუხლი",
-        "file_name": "ეთიკის_კოდექსი.docx",
-        "question": (
-            "მართებულია თუ არა ადვოკატის მიერ კლიენტის კონფიდანციალური"
-            " ინფორმაციის გამჟღავნება მესამე პირებისთვის კლიენტის თანხმობის"
-            " გარეშე?"
-        ),
-        "options": [
-            "ა) დიახ, თუ ეს ადვოკატის ინტერესებშია.",
-            (
-                "ბ) არა, პროფესიული საიდუმლოების დაცვა ადვოკატის უვადო"
-                " მოვალეობაა."
-            ),
-            "გ) დიახ, თუ კლიენტმა ჰონორარი არ გადაიხადა.",
-            "დ) მხოლოდ ჟურნალისტებთან საუბრისას.",
-        ],
-        "correct_index": 1,
-        "explanation": (
-            "ადვოკატთა პროფესიული ეთიკის კოდექსის თანახმად, პროფესიული"
-            " საიდუმლოების დაცვა ადვოკატის ფუნდამენტური და უვადო მოვალეობაა."
-        ),
-    },
 ]
 
 
 def load_data():
-  if os.path.exists(DATA_FILE):
-    try:
-      with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-    except Exception:
-      return DEFAULT_DATA
-  else:
-    save_data(DEFAULT_DATA)
-    return DEFAULT_DATA
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return DEFAULT_DATA
+    else:
+        save_data(DEFAULT_DATA)
+        return DEFAULT_DATA
 
 
 def save_data(data):
-  try:
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-      json.dump(data, f, ensure_ascii=False, indent=2)
-  except Exception:
-    pass
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 def load_progress():
-  if os.path.exists(PROGRESS_FILE):
-    try:
-      with open(PROGRESS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-    except Exception:
-      return {}
-  return {}
+    if os.path.exists(PROGRESS_FILE):
+        try:
+            with open(PROGRESS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
 
 
 def save_progress(progress):
-  try:
-    with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
-      json.dump(progress, f, ensure_ascii=False, indent=2)
-  except Exception:
-    pass
-
-
-# Google Drive-იდან ფაილის ჩამოტვირთვის ფუნქცია
-def download_gdrive_file(url):
-  match = re.search(r"/d/([a-zA-Z0-9_-]+)", url) or re.search(
-      r"id=([a-zA-Z0-9_-]+)", url
-  )
-  if not match:
-    return None, "Google Drive-ის არასწორი ლინკი!"
-  file_id = match.group(1)
-  download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-  try:
-    req = urllib.request.Request(
-        download_url, headers={"User-Agent": "Mozilla/5.0"}
-    )
-    with urllib.request.urlopen(req) as response:
-      data = response.read()
-    return data, None
-  except Exception as e:
-    return None, f"ჩამოტვირთვის შეცდომა: {str(e)}"
-
-
-# ჭკვიანი ფაილის დამუშავება (Word / Text) - მრავალფაზიანი დაყოფა
-def parse_uploaded_file(uploaded_file, selected_code, file_name=None):
-  if file_name is None:
-    file_name = getattr(uploaded_file, "name", "gdrive_doc.docx")
-
-  content_lines = []
-
-  if file_name.endswith(".docx"):
     try:
-      import docx
+        with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
+            json.dump(progress, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
-      doc = docx.Document(uploaded_file)
 
-      # 1. წავიკითხოთ ყველა აბზაცი (მათ შორის Shift+Enter)
-      for p in doc.paragraphs:
-        # XML-დან Shift+Enter-ების ჩანაცვლება ჩვეულებრივი სტრიქონის გადაყვანით
-        p_text = p.text
-        if p_text and p_text.strip():
-          content_lines.append(p_text.strip())
-        else:
-          content_lines.append("")  # ცარიელი სტრიქონი გამყოფად
-
-      # 2. თუ ფაილში ცხრილებია (Tables), წავიკითხოთ ცხრილების ტექსტიც!
-      for table in doc.tables:
-        for row in table.rows:
-          row_text = [
-              cell.text.strip() for cell in row.cells if cell.text.strip()
-          ]
-          if row_text:
-            content_lines.append(" | ".join(row_text))
-
-    except Exception as e:
-      if hasattr(uploaded_file, "read"):
-        content_lines = [
-            str(uploaded_file.read().decode("utf-8", "ignore"))
-        ]
-      else:
-        content_lines = [str(uploaded_file)]
-  else:
-    if hasattr(uploaded_file, "read"):
-      raw_text = str(uploaded_file.read().decode("utf-8", "ignore"))
-    else:
-      raw_text = str(uploaded_file)
-    content_lines = raw_text.split("\n")
-
-  full_text = "\n".join(content_lines).replace("\r\n", "\n").replace("\r", "\n")
-
-  # 3. მრავალდონიანი დაყოფა კაზუსებად
-  # ა) გამყოფებით (---, ===, ***)
-  if re.search(r"\n\s*[-=*]{3,}\s*\n", full_text):
-    blocks = [
-        b.strip()
-        for b in re.split(r"\n?\s*[-=*]{3,}\s*\n?", full_text)
-        if b.strip()
-    ]
-  # ბ) ცარიელი სტრიქონებით (Enter-ებით)
-  elif len([b for b in re.split(r"\n\s*\n+", full_text) if b.strip()]) > 1:
-    blocks = [
-        b.strip() for b in re.split(r"\n\s*\n+", full_text) if b.strip()
-    ]
-  # გ) ნუმერაციით ან საკვანძო სიტყვებით (კაზუსი, ტესტი, 1., 2.)
-  else:
-    pattern = r"(?:^|\n)\s*(?=(?:კაზუსი|ტესტი|კითხვა|საქმე|ქეისი|№|#|N|\d+[\.\)\-–—])\s*)"
-    blocks = [
-        b.strip()
-        for b in re.split(pattern, full_text, flags=re.IGNORECASE)
-        if b.strip()
-    ]
-
-  if not blocks:
-    blocks = [full_text.strip()]
-
-  new_cases = []
-  for idx, block in enumerate(blocks):
-    if not block or len(block) < 5:
-      continue
-
-    lines = [l.strip() for l in block.split("\n") if l.strip()]
-    if not lines:
-      continue
-
-    title = lines[0][:70]
-
-    options = []
-    question_lines = []
-    explanation_lines = []
-    correct_idx = 0
-
-    opt_pattern = r"^\s*([ა-დa-dA-D1-4])[\.\)]\s*(.*)"
-    exp_keywords = [
-      "დასაბუთება:",
-      "განმარტება:",
-      "იურიდიული დასაბუთება:",
-      "სამართლებრივი დასაბუთება:",
-      "სამართლებრივი საფუძველი:",
-      "ანალიზი:",
-    ]
-    correct_keywords = ["სწორი პასუხია:", "სწორი პასუხი:", "პასუხი:"]
-
-    in_explanation = False
-
-    for line in lines:
-      # შევამოწმოთ, ხომ არ არის სწორი პასუხის მითითება
-      is_correct_line = False
-      for ck in correct_keywords:
-        if ck in line.lower():
-          is_correct_line = True
-          if "ბ" in line.lower() or "2" in line:
-            correct_idx = 1
-          elif "გ" in line.lower() or "3" in line:
-            correct_idx = 2
-          elif "დ" in line.lower() or "4" in line:
-            correct_idx = 3
-          else:
-            correct_idx = 0
-          break
-
-      if is_correct_line:
-        continue
-
-      # შევამოწმოთ, ხომ არ იწყება დასაბუთების სექცია
-      is_exp_start = any(k in line.lower() for k in exp_keywords)
-      if is_exp_start:
-        in_explanation = True
-
-      if in_explanation:
-        explanation_lines.append(line)
-      else:
-        # შევამოწმოთ სავარაუდო პასუხი (ა, ბ, გ, დ)
-        match = re.match(opt_pattern, line)
-        if match:
-          options.append(line)
-        else:
-          question_lines.append(line)
-
-    question_text = "\n".join(question_lines) if question_lines else block
-    explanation_text = (
-        "\n".join(explanation_lines)
-        if explanation_lines
-        else f"ანალიზი დაყრდნობილია ატვირთულ ფაილზე: {file_name}."
+def download_gdrive_file(url):
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", url) or re.search(
+        r"id=([a-zA-Z0-9_-]+)", url
     )
+    if not match:
+        return None, "Google Drive-ის არასწორი ლინკი!"
+    file_id = match.group(1)
+    download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    try:
+        req = urllib.request.Request(
+            download_url, headers={"User-Agent": "Mozilla/5.0"}
+        )
+        with urllib.request.urlopen(req) as response:
+            data = response.read()
+        return data, None
+    except Exception as e:
+        return None, f"ჩამოტვირთვის შეცდომა: {str(e)}"
 
-    if len(options) < 2:
-      options = [
-          "ა) სწორია / დასაშვებია (სამართლებრივი საფუძვლით)",
-          "ბ) არასწორია / უსაფუძვლოა",
-          "გ) ნაწილობრივ მართებულია",
-          "დ) საჭიროებს დამატებით მტკიცებულებებს",
-      ]
 
-    new_cases.append({
-        "id": f"upload_{int(time.time())}_{idx}",
-        "title": f"კაზუსი #{idx+1}: {title}",
-        "code": selected_code,
-        "article": f"ფაილი: {file_name}",
-        "file_name": file_name,
-        "question": question_text,
-        "options": options,
-        "correct_index": correct_idx,
-        "explanation": explanation_text,
-    })
+def parse_uploaded_file(uploaded_file, selected_code, file_name=None):
+    if file_name is None:
+        file_name = getattr(uploaded_file, "name", "gdrive_doc.docx")
+    content_lines = []
+    if file_name.endswith(".docx"):
+        try:
+            import docx
 
-  return new_cases
+            doc = docx.Document(uploaded_file)
+            for p in doc.paragraphs:
+                p_text = p.text
+                if p_text and p_text.strip():
+                    content_lines.append(p_text.strip())
+                else:
+                    content_lines.append("")
+            for table in doc.tables:
+                for row in table.rows:
+                    row_text = [
+                        cell.text.strip() for cell in row.cells if cell.text.strip()
+                    ]
+                    if row_text:
+                        content_lines.append(" | ".join(row_text))
+        except Exception:
+            if hasattr(uploaded_file, "read"):
+                content_lines = [
+                    str(uploaded_file.read().decode("utf-8", "ignore"))
+                ]
+            else:
+                content_lines = [str(uploaded_file)]
+    else:
+        if hasattr(uploaded_file, "read"):
+            raw_text = str(uploaded_file.read().decode("utf-8", "ignore"))
+        else:
+            raw_text = str(uploaded_file)
+        content_lines = raw_text.split("\n")
+
+    full_text = (
+        "\n".join(content_lines).replace("\r\n", "\n").replace("\r", "\n")
+    )
+    if re.search(r"\n\s*[-=*]{3,}\s*\n", full_text):
+        blocks = [
+            b.strip()
+            for b in re.split(r"\n?\s*[-=*]{3,}\s*\n?", full_text)
+            if b.strip()
+        ]
+    elif len([b for b in re.split(r"\n\s*\n+", full_text) if b.strip()]) > 1:
+        blocks = [
+            b.strip() for b in re.split(r"\n\s*\n+", full_text) if b.strip()
+        ]
+    else:
+        pattern = (
+            r"(?:^|\n)\s*(?=(?:კაზუსი|ტესტი|კითხვა|საქმე|ქეისი|№|#|N|\d+[\.\)\-–—])\s*)"
+        )
+        blocks = [
+            b.strip()
+            for b in re.split(pattern, full_text, flags=re.IGNORECASE)
+            if b.strip()
+        ]
+
+    if not blocks:
+        blocks = [full_text.strip()]
+
+    new_cases = []
+    for idx, block in enumerate(blocks):
+        if not block or len(block) < 5:
+            continue
+        lines = [l.strip() for l in block.split("\n") if l.strip()]
+        if not lines:
+            continue
+        title = lines[0][:70]
+        options = []
+        question_lines = []
+        explanation_lines = []
+        correct_idx = 0
+        opt_pattern = r"^\s*([ა-დa-dA-D1-4])[\.\)]\s*(.*)"
+        exp_keywords = [
+            "დასაბუთება:",
+            "განმარტება:",
+            "იურიდიული დასაბუთება:",
+            "სამართლებრივი დასაბუთება:",
+            "სამართლებრივი საფუძველი:",
+            "ანალიზი:",
+        ]
+        correct_keywords = ["სწორი პასუხია:", "სწორი პასუხი:", "პასუხი:"]
+        in_explanation = False
+        for line in lines:
+            is_correct_line = False
+            for ck in correct_keywords:
+                if ck in line.lower():
+                    is_correct_line = True
+                    if "ბ" in line.lower() or "2" in line:
+                        correct_idx = 1
+                    elif "გ" in line.lower() or "3" in line:
+                        correct_idx = 2
+                    elif "დ" in line.lower() or "4" in line:
+                        correct_idx = 3
+                    else:
+                        correct_idx = 0
+                    break
+            if is_correct_line:
+                continue
+            is_exp_start = any(k in line.lower() for k in exp_keywords)
+            if is_exp_start:
+                in_explanation = True
+            if in_explanation:
+                explanation_lines.append(line)
+            else:
+                match = re.match(opt_pattern, line)
+                if match:
+                    options.append(line)
+                else:
+                    question_lines.append(line)
+
+        question_text = (
+            "\n".join(question_lines) if question_lines else block
+        )
+        explanation_text = (
+            "\n".join(explanation_lines)
+            if explanation_lines
+            else f"ანალიზი დაყრდნობილია ატვირთულ ფაილზე: {file_name}."
+        )
+        if len(options) < 2:
+            options = [
+                "ა) სწორია / დასაშვებია (სამართლებრივი საფუძვლით)",
+                "ბ) არასწორია / უსაფუძვლოა",
+                "გ) ნაწილობრივ მართებულია",
+                "დ) საჭიროებს დამატებით მტკიცებულებებს",
+            ]
+        new_cases.append({
+            "id": f"upload_{int(time.time())}_{idx}",
+            "title": f"კაზუსი #{idx+1}: {title}",
+            "code": selected_code,
+            "article": f"ფაილი: {file_name}",
+            "file_name": file_name,
+            "question": question_text,
+            "options": options,
+            "correct_index": correct_idx,
+            "explanation": explanation_text,
+        })
+    return new_cases
 
 
 cases_db = load_data()
 user_progress = load_progress()
 
-# Initialize Session State
 if "user_name" not in st.session_state:
-  st.session_state["user_name"] = None
+    st.session_state["user_name"] = None
 if "active_tab" not in st.session_state:
-  st.session_state["active_tab"] = "home"
+    st.session_state["active_tab"] = "home"
 if "theme" not in st.session_state:
-  st.session_state["theme"] = "light"
+    st.session_state["theme"] = "light"
 if "admin_logged_in" not in st.session_state:
-  st.session_state["admin_logged_in"] = False
+    st.session_state["admin_logged_in"] = False
 if "bookmarks" not in st.session_state:
-  st.session_state["bookmarks"] = user_progress.get("bookmarks", [])
+    st.session_state["bookmarks"] = user_progress.get("bookmarks", [])
 if "study_indices" not in st.session_state:
-  st.session_state["study_indices"] = user_progress.get("study_indices", {})
+    st.session_state["study_indices"] = user_progress.get("study_indices", {})
 if "exam_active" not in st.session_state:
-  st.session_state["exam_active"] = False
+    st.session_state["exam_active"] = False
 if "streak" not in st.session_state:
-  st.session_state["streak"] = user_progress.get("streak", 3)
+    st.session_state["streak"] = user_progress.get("streak", 3)
 if "daily_goal_done" not in st.session_state:
-  st.session_state["daily_goal_done"] = user_progress.get("daily_goal_done", 8)
+    st.session_state["daily_goal_done"] = user_progress.get("daily_goal_done", 8)
 if "daily_goal_target" not in st.session_state:
-  st.session_state["daily_goal_target"] = 15
+    st.session_state["daily_goal_target"] = 15
 
-# ==============================================================================
-# 2. DYNAMIC THEME & GLASSMORPHISM CSS
-# ==============================================================================
 is_dark = st.session_state["theme"] == "dark"
 bg_color = "#0F172A" if is_dark else "#FDFBF7"
-card_bg = "rgba(30, 41, 59, 0.75)" if is_dark else "rgba(255, 255, 255, 0.85)"
-card_border = "rgba(212, 175, 55, 0.3)" if is_dark else "rgba(226, 232, 240, 0.9)"
+card_bg = (
+    "rgba(30, 41, 59, 0.75)" if is_dark else "rgba(255, 255, 255, 0.85)"
+)
+card_border = (
+    "rgba(212, 175, 55, 0.3)" if is_dark else "rgba(226, 232, 240, 0.9)"
+)
 text_color = "#F8FAFC" if is_dark else "#1E293B"
 sub_text_color = "#94A3B8" if is_dark else "#64748B"
 accent_gold = "#D4AF37"
@@ -419,66 +342,17 @@ accent_blue = "#3B82F6" if is_dark else "#1E3A8A"
 
 st.markdown(
     f"""
-<style>
-    .stApp {{
-        background-color: {bg_color};
-        color: {text_color};
-    }}
-    .main-header {{
-        font-size: 2.2rem;
-        color: {accent_blue};
-        text-align: center;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }}
-    .sub-header {{
-        font-size: 1.1rem;
-        color: {sub_text_color};
-        text-align: center;
-        margin-bottom: 1.8rem;
-    }}
-    .card {{
-        background: {card_bg};
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-radius: 16px;
-        padding: 1.5rem;
-        border: 1px solid {card_border};
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.2rem;
-    }}
-    .stButton>button {{
-        background-color: {accent_blue};
-        color: white;
-        border-radius: 10px;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s ease;
-    }}
-    .stButton>button:hover {{
-        background-color: #2563EB;
-        color: white;
-        transform: translateY(-1px);
-    }}
-    .badge-code {{
-        background-color: #DBEAFE;
-        color: #1E40AF;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }}
-    .badge-article {{
-        background-color: #FEF3C7;
-        color: #92400E;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }}
-</style>
-""",
+    <style>
+        .stApp {{ background-color: {bg_color}; color: {text_color}; }}
+        .main-header {{ font-size: 2.2rem; color: {accent_blue}; text-align: center; font-weight: 700; margin-bottom: 0.5rem; }}
+        .sub-header {{ font-size: 1.1rem; color: {sub_text_color}; text-align: center; margin-bottom: 1.8rem; }}
+        .card {{ background: {card_bg}; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 16px; padding: 1.5rem; border: 1px solid {card_border}; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-bottom: 1.2rem; }}
+        .stButton>button {{ background-color: {accent_blue}; color: white; border-radius: 10px; padding: 0.5rem 1rem; font-weight: 600; border: none; transition: all 0.2s ease; }}
+        .stButton>button:hover {{ background-color: #2563EB; color: white; transform: translateY(-1px); }}
+        .badge-code {{ background-color: #DBEAFE; color: #1E40AF; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }}
+        .badge-article {{ background-color: #FEF3C7; color: #92400E; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }}
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -489,13 +363,11 @@ def render_svg_gauge(score_percent, title="მზაობის ინდექ
       if score_percent >= 75
       else ("#F59E0B" if score_percent >= 50 else "#EF4444")
   )
-
   svg_html = f"""
     <div style="text-align: center; padding: 10px;">
         <svg width="180" height="110" viewBox="0 0 200 120">
             <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E2E8F0" stroke-width="18" stroke-linecap="round" />
-            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="{color}" stroke-width="18" stroke-linecap="round"
-                stroke-dasharray="251.2" stroke-dashoffset="{251.2 - (251.2 * score_percent / 100)}" />
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="{color}" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="{251.2 - (251.2 * score_percent / 100)}" />
             <text x="100" y="85" text-anchor="middle" font-size="28" font-weight="bold" fill="{text_color}">{score_percent}%</text>
             <text x="100" y="110" text-anchor="middle" font-size="13" fill="{sub_text_color}">{title}</text>
         </svg>
@@ -504,9 +376,6 @@ def render_svg_gauge(score_percent, title="მზაობის ინდექ
   return svg_html
 
 
-# ==============================================================================
-# 3. LOGO INTEGRATION & LANDING PAGE
-# ==============================================================================
 LOGO_PATHS = [
     "Blue and White Modern Minimalist Law Business Logo.png",
     "logo.png",
@@ -530,10 +399,9 @@ if not st.session_state["user_name"]:
       "<h2 class='main-header'>⚖️ LEGAL PORTAL</h2>", unsafe_allow_html=True
   )
   st.write("შეიყვანეთ სახელი და გვარი სისტემაში შესასვლელად:")
-
   name_input = st.text_input(
       "სახელი და გვარი:",
-      placeholder="სახელი",
+      placeholder="მაგ: გიორგი ბერიძე",
       label_visibility="collapsed",
   )
   if st.button("🚀 სისტემაში შესვლა"):
@@ -545,41 +413,31 @@ if not st.session_state["user_name"]:
   st.markdown("</div>", unsafe_allow_html=True)
   st.stop()
 
-# ==============================================================================
-# 4. TOP NAVIGATION BAR (წვრილი, კომპაქტური, iOS-სტილი)
-# ==============================================================================
 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns(
     [1.5, 1, 1, 1, 1, 1, 0.8]
 )
-
 with nav_col1:
   st.markdown(f"**⚖️ LEGAL** | `{st.session_state['user_name']}`")
-
 with nav_col2:
   if st.button("🏠 მთავარი", key="btn_nav_home"):
     st.session_state["active_tab"] = "home"
     st.rerun()
-
 with nav_col3:
   if st.button("📖 სწავლა", key="btn_nav_study"):
     st.session_state["active_tab"] = "study"
     st.rerun()
-
 with nav_col4:
   if st.button("⏱️ გამოცდა", key="btn_nav_exam"):
     st.session_state["active_tab"] = "exam"
     st.rerun()
-
 with nav_col5:
   if st.button("📊 ანალიტიკა", key="btn_nav_analytics"):
     st.session_state["active_tab"] = "analytics"
     st.rerun()
-
 with nav_col6:
   if st.button("🔒 ატვირთვა", key="btn_nav_upload"):
     st.session_state["active_tab"] = "upload"
     st.rerun()
-
 with nav_col7:
   theme_icon = "🌙" if not is_dark else "☀️"
   if st.button(theme_icon, key="btn_theme_toggle"):
@@ -588,17 +446,13 @@ with nav_col7:
 
 st.markdown("<hr style='margin: 0.5rem 0 1.5rem 0;' />", unsafe_allow_html=True)
 
-# ==============================================================================
-# 5. TAB 1: 🏠 HOME PAGE (დეშბორდი, ძიება, Streak, ჩარჩოებიანი ბარათები)
-# ==============================================================================
 if st.session_state["active_tab"] == "home":
   st.markdown("<div class='card'>", unsafe_allow_html=True)
   h_col1, h_col2, h_col3 = st.columns(3)
-
   with h_col1:
     st.markdown(f"### 👋 გამარჯობა, **{st.session_state['user_name']}**!")
     st.write(
-        " გაიარეთ კაზუსები და"
+        "მოემზადეთ ადვოკატთა გამოცდისთვის ეფექტურად. გაიარეთ კაზუსები და"
         " შეამოწმეთ ცოდნა."
     )
     st.caption(
@@ -613,10 +467,8 @@ if st.session_state["active_tab"] == "home":
         / st.session_state["daily_goal_target"],
     )
     st.progress(progress_val)
-
   with h_col2:
     st.components.v1.html(render_svg_gauge(78, "საერთო მზაობა"), height=130)
-
   with h_col3:
     st.markdown("**🔖 შენახული კაზუსები:**")
     st.write(f"სულ შენახულია: **{len(st.session_state['bookmarks'])}**")
@@ -625,14 +477,12 @@ if st.session_state["active_tab"] == "home":
       st.rerun()
   st.markdown("</div>", unsafe_allow_html=True)
 
-  # სწრაფი ძიება
   st.markdown("<div class='card'>", unsafe_allow_html=True)
   st.subheader("🔍 სწრაფი ძიება ბაზაში")
   search_query = st.text_input(
       "შეიყვანეთ საკვანძო სიტყვა, მუხლი ან თემა:",
       placeholder="მაგ: 405-ე მუხლი, მკვლელობა, საჩივარი...",
   )
-
   if search_query.strip():
     search_results = [
         c
@@ -648,7 +498,6 @@ if st.session_state["active_tab"] == "home":
         st.write(res["question"])
   st.markdown("</div>", unsafe_allow_html=True)
 
-  # სექციების ბარათები
   cat_col1, cat_col2, cat_col3 = st.columns(3)
   with cat_col1:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -659,7 +508,6 @@ if st.session_state["active_tab"] == "home":
       st.session_state["active_tab"] = "study"
       st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
   with cat_col2:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("📕 სისხლის")
@@ -669,7 +517,6 @@ if st.session_state["active_tab"] == "home":
       st.session_state["active_tab"] = "study"
       st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
   with cat_col3:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("📗 ადმინისტრაციული")
@@ -680,23 +527,15 @@ if st.session_state["active_tab"] == "home":
       st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ==============================================================================
-# 6. TAB 2: 📖 STUDY MODE
-# ==============================================================================
 elif st.session_state["active_tab"] == "study":
   st.title("📖 სწავლისა და ვარჯიშის გრაფა")
-
   all_codes = sorted(list(set([c["code"] for c in cases_db])))
   all_codes.insert(0, "ყველა კოდექსი / საგანი")
-
   selected_code = st.selectbox("📚 აირჩიეთ კოდექსი/საგანი:", all_codes)
-
   filtered_cases = cases_db
   if selected_code != "ყველა კოდექსი / საგანი":
     filtered_cases = [c for c in cases_db if c.get("code") == selected_code]
-
   st.write(f"📊 ნაპოვნია **{len(filtered_cases)}** კაზუსი/ტესტი.")
-
   if not filtered_cases:
     st.info("ამ სექციაში ჯერ არ არის ატვირთული კაზუსები.")
   else:
@@ -713,13 +552,11 @@ elif st.session_state["active_tab"] == "study":
         st.markdown(
             f"### **ფაქტობრივი გარემოებები / კითხვა:**\n{case['question']}"
         )
-
         user_ans = st.radio(
             f"აირჩიეთ სწორი პასუხი #{idx+1}:",
             case["options"],
             key=f"study_radio_{case['id']}",
         )
-
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
           if st.button("🔍 პასუხის შემოწმება", key=f"check_btn_{case['id']}"):
@@ -733,11 +570,9 @@ elif st.session_state["active_tab"] == "study":
               save_progress(user_progress)
             else:
               st.error(f"❌ **არასწორია.** სწორი პასუხია: {correct_opt}")
-
             st.info(
                 f"💡 **სამართლებრივი დასაბუთება:**\n{case['explanation']}"
             )
-
         with col_btn2:
           is_bookmarked = case["id"] in st.session_state["bookmarks"]
           bm_label = "🔖 წაშლა" if is_bookmarked else "🔖 შენახვა"
@@ -750,12 +585,8 @@ elif st.session_state["active_tab"] == "study":
             save_progress(user_progress)
             st.rerun()
 
-# ==============================================================================
-# 7. TAB 3: ⏱️ EXAM MODE
-# ==============================================================================
 elif st.session_state["active_tab"] == "exam":
   st.title("⏱️ ადვოკატთა გამოცდის სიმულაცია")
-
   col1, col2 = st.columns(2)
   with col1:
     all_codes = sorted(list(set([c["code"] for c in cases_db])))
@@ -766,13 +597,10 @@ elif st.session_state["active_tab"] == "exam":
         "⏳ საგამოცდო დრო:",
         ["30 წუთი", "1 საათი", "2 საათი", "3 საათი", "უვადო"],
     )
-
   exam_cases = cases_db
   if exam_code != "ყველა კოდექსი (სრული გამოცდა)":
     exam_cases = [c for c in cases_db if c.get("code") == exam_code]
-
   st.markdown("---")
-
   if not st.session_state["exam_active"]:
     st.write(f"🎯 ხელმისაწვდომია: **{len(exam_cases)}** კითხვა.")
     if st.button("🚀 გამოცდის დაწყება"):
@@ -795,18 +623,15 @@ elif st.session_state["active_tab"] == "exam":
         )
         user_responses[case["id"]] = ans
         st.markdown("---")
-
       submit_exam = st.form_submit_button(
           "🏁 გამოცდის დასრულება და შეფასება"
       )
-
     if submit_exam:
       st.session_state["exam_active"] = False
       score = 0
       total = len(exam_cases)
       st.balloons()
       st.title("🎉 გამოცდის შედეგები")
-
       for idx, case in enumerate(exam_cases):
         user_selected = user_responses.get(case["id"])
         correct_ans = case["options"][case["correct_index"]]
@@ -817,18 +642,13 @@ elif st.session_state["active_tab"] == "exam":
           st.error(
               f"კითხვა {idx+1}: ❌ არასწორია. სწორია: '{correct_ans}'"
           )
-
       percentage = round((score / total) * 100, 1) if total > 0 else 0
       st.markdown(f"### 📊 საბოლოო ქულა: **{score} / {total}** ({percentage}%)")
 
-# ==============================================================================
-# 8. TAB 4: 📊 ANALYTICS MODE
-# ==============================================================================
 elif st.session_state["active_tab"] == "analytics":
   st.title("📊 პროგრესის ანალიტიკა")
   st.markdown("<div class='card'>", unsafe_allow_html=True)
   st.subheader("🎯 თქვენი სტატისტიკა")
-
   st.write(f"👤 **მომხმარებელი:** {st.session_state['user_name']}")
   st.write(f"🔥 **აქტიური Streak:** {st.session_state['streak']} დღე")
   st.write(
@@ -840,12 +660,8 @@ elif st.session_state["active_tab"] == "analytics":
   )
   st.markdown("</div>", unsafe_allow_html=True)
 
-# ==============================================================================
-# 9. TAB 5: 🔒 UPLOAD & GOOGLE DRIVE INTEGRATION
-# ==============================================================================
 elif st.session_state["active_tab"] == "upload":
   st.title("🔒 ადმინისტრირება & ფაილების ატვირთვა")
-
   if not st.session_state["admin_logged_in"]:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     pwd_input = st.text_input(
@@ -861,13 +677,10 @@ elif st.session_state["active_tab"] == "upload":
     st.markdown("</div>", unsafe_allow_html=True)
   else:
     st.success("✅ ავტორიზებული ხართ როგორც ადმინისტრატორი!")
-
     col_left, col_right = st.columns(2)
-
     with col_left:
       st.markdown("<div class='card'>", unsafe_allow_html=True)
       st.subheader("📤 ახალი ფაილის დამატება")
-
       upload_code = st.selectbox(
           "აირჩიეთ კოდექსი/სფერო:",
           [
@@ -877,15 +690,13 @@ elif st.session_state["active_tab"] == "upload":
               "საკონსტიტუციო სამართალი",
               "საერთაშორისო სამართალი",
               "ადვოკატთა პროფესიული ეთიკა",
-              "საქმეები",
+              "საქმეები / სასამართლო პრაქტიკა",
           ],
       )
-
       source_mode = st.radio(
           "აირჩიეთ დამატების გზა:",
           ["☁️ Google Drive-ის ლინკით", "📁 პირდაპირ ატვირთვა (<200MB)"],
       )
-
       if source_mode == "☁️ Google Drive-ის ლინკით":
         drive_url = st.text_input("ჩასვით Google Drive-ის გაზიარებული ლინკი:")
         if st.button("📥 Google Drive-იდან ჩამოტვირთვა და დამატება"):
@@ -915,7 +726,7 @@ elif st.session_state["active_tab"] == "upload":
             "ატვირთეთ Word (.docx) ან Text (.txt) ფაილი:",
             type=["docx", "txt"],
         )
-        if st.button("➕ ფაილის ატვირთვა და ბაზაში დამატება"):
+        if st.button("➕ ფაილის ატვირთვა და დამატება"):
           if uploaded_file is not None:
             parsed_cases = parse_uploaded_file(uploaded_file, upload_code)
             cases_db.extend(parsed_cases)
@@ -928,12 +739,10 @@ elif st.session_state["active_tab"] == "upload":
           else:
             st.warning("გთხოვთ, ჯერ აირჩიოთ ფაილი!")
       st.markdown("</div>", unsafe_allow_html=True)
-
     with col_right:
       st.markdown("<div class='card'>", unsafe_allow_html=True)
       st.subheader("🗑️ არსებული ფაილების/კაზუსების წაშლა")
       st.write(f"სისტემაში სულ არის **{len(cases_db)}** კაზუსი/ტესტი.")
-
       for idx, case in enumerate(cases_db):
         c_col1, c_col2 = st.columns([3, 1])
         with c_col1:
@@ -948,7 +757,6 @@ elif st.session_state["active_tab"] == "upload":
             st.success("წაშლილია!")
             st.rerun()
         st.markdown("---")
-
       if st.button("⚠️ ყველა მონაცემის საწყის მდგომარეობაში დაბრუნება"):
         save_data(DEFAULT_DATA)
         st.success("მონაცემები განახლდა!")
