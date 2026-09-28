@@ -469,7 +469,7 @@ if not st.session_state["user_name"]:
 
   name_input = st.text_input(
       "სახელი და გვარი:",
-      placeholder="სახელი",
+      placeholder="მაგ: გიორგი ბერიძე",
       label_visibility="collapsed",
   )
   if st.button("🚀 სისტემაში შესვლა"):
@@ -529,12 +529,12 @@ st.markdown("<hr style='margin: 0.5rem 0 1.5rem 0;' />", unsafe_allow_html=True)
 # ==============================================================================
 if st.session_state["active_tab"] == "home":
   st.markdown("<div class='card'>", unsafe_allow_html=True)
-  h_col1, h_col2, h_col3 = st.columns()
+  h_col1, h_col2, h_col3 = st.columns(3)
 
   with h_col1:
     st.markdown(f"### 👋 გამარჯობა, **{st.session_state['user_name']}**!")
     st.write(
-        " გაიარეთ კაზუსები და"
+        "მოემზადეთ ადვოკატთა გამოცდისთვის ეფექტურად. გაიარეთ კაზუსები და"
         " შეამოწმეთ ცოდნა."
     )
     st.caption(
@@ -656,7 +656,7 @@ elif st.session_state["active_tab"] == "study":
             key=f"study_radio_{case['id']}",
         )
 
-        col_btn1, col_btn2 = st.columns()
+        col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
           if st.button("🔍 პასუხის შემოწმება", key=f"check_btn_{case['id']}"):
             correct_opt = case["options"][case["correct_index"]]
@@ -798,7 +798,7 @@ elif st.session_state["active_tab"] == "upload":
   else:
     st.success("✅ ავტორიზებული ხართ როგორც ადმინისტრატორი!")
 
-    col_left, col_right = st.columns()
+    col_left, col_right = st.columns(2)
 
     with col_left:
       st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -870,7 +870,7 @@ elif st.session_state["active_tab"] == "upload":
       st.write(f"სისტემაში სულ არის **{len(cases_db)}** კაზუსი/ტესტი.")
 
       for idx, case in enumerate(cases_db):
-        c_col1, c_col2 = st.columns()
+        c_col1, c_col2 = st.columns([3, 1])
         with c_col1:
           st.caption(
               f"📌 #{idx+1} {case['title']} ({case['code']}) | 📁"
